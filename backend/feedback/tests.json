@@ -1,0 +1,19 @@
+{
+  "tests": [
+    {
+      "name": "Test create feedback",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "name": "Тестовый пользователь",
+        "phone": "+7 999 123-45-67",
+        "message": "Тестовое сообщение обратной связи"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

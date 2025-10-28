@@ -1,0 +1,22 @@
+{
+  "tests": [
+    {
+      "name": "Test create booking",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "client_name": "Тестовый клиент",
+        "phone": "+7 999 123-45-67",
+        "service": "haircut",
+        "master": "anna",
+        "booking_date": "2024-12-01",
+        "booking_time": "14:00"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

@@ -1,4 +1,8 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/lib/auth';
+import { useToast } from '@/components/ui/use-toast';
+import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -10,8 +14,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Icon from '@/components/ui/icon';
 
 function Index() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
   const navigation = [
     { id: 'home', label: 'Главная' },
@@ -71,6 +81,22 @@ function Index() {
     element?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: 'Вы вышли из системы',
+        description: 'До встречи!',
+      });
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось выйти из системы',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-secondary/30">
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-border shadow-sm">
@@ -95,6 +121,32 @@ function Index() {
                   {item.label}
                 </button>
               ))}
+              
+              {user ? (
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-muted-foreground">{user.full_name}</span>
+                  <Button size="sm" variant="outline" onClick={() => navigate('/cabinet')}>
+                    Личный кабинет
+                  </Button>
+                  {user.role === 'admin' && (
+                    <Button size="sm" variant="outline" onClick={() => navigate('/admin')}>
+                      Админ-панель
+                    </Button>
+                  )}
+                  <Button size="sm" variant="ghost" onClick={handleLogout}>
+                    Выйти
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <Button size="sm" variant="outline" onClick={() => setIsLoginOpen(true)}>
+                    Вход
+                  </Button>
+                  <Button size="sm" onClick={() => setIsRegisterOpen(true)}>
+                    Регистрация
+                  </Button>
+                </div>
+              )}
             </div>
 
             <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
@@ -118,12 +170,43 @@ function Index() {
                       {item.label}
                     </button>
                   ))}
+                  
+                  <div className="border-t pt-4 mt-4 space-y-2">
+                    {user ? (
+                      <>
+                        <div className="px-4 py-2 text-sm font-medium text-muted-foreground">{user.full_name}</div>
+                        <Button className="w-full" variant="outline" onClick={() => { setIsMenuOpen(false); navigate('/cabinet'); }}>
+                          Личный кабинет
+                        </Button>
+                        {user.role === 'admin' && (
+                          <Button className="w-full" variant="outline" onClick={() => { setIsMenuOpen(false); navigate('/admin'); }}>
+                            Админ-панель
+                          </Button>
+                        )}
+                        <Button className="w-full" variant="ghost" onClick={() => { setIsMenuOpen(false); handleLogout(); }}>
+                          Выйти
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button className="w-full" variant="outline" onClick={() => { setIsMenuOpen(false); setIsLoginOpen(true); }}>
+                          Вход
+                        </Button>
+                        <Button className="w-full" onClick={() => { setIsMenuOpen(false); setIsRegisterOpen(true); }}>
+                          Регистрация
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>
           </nav>
         </div>
       </header>
+
+      <LoginDialog open={isLoginOpen} onOpenChange={setIsLoginOpen} />
+      <RegisterDialog open={isRegisterOpen} onOpenChange={setIsRegisterOpen} />
 
       <main>
         <section id="home" className="py-20 md:py-32 animate-fade-in">
@@ -355,21 +438,7 @@ function Index() {
               <Card>
                 <CardContent className="p-6">
                   <h3 className="text-xl font-semibold mb-4">Обратная связь</h3>
-                  <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-                    <div>
-                      <Label htmlFor="contact-name">Имя</Label>
-                      <Input id="contact-name" placeholder="Ваше имя" />
-                    </div>
-                    <div>
-                      <Label htmlFor="contact-phone">Телефон</Label>
-                      <Input id="contact-phone" placeholder="+7 (___) ___-__-__" />
-                    </div>
-                    <div>
-                      <Label htmlFor="contact-message">Сообщение</Label>
-                      <Textarea id="contact-message" placeholder="Ваше сообщение" rows={4} />
-                    </div>
-                    <Button className="w-full">Отправить</Button>
-                  </form>
+                  <FeedbackForm />
                 </CardContent>
               </Card>
             </div>
@@ -405,20 +474,181 @@ function Index() {
   );
 }
 
-function BookingForm() {
+function LoginDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    const result = await login(email, password);
+    
+    setLoading(false);
+    
+    if (result.success) {
+      toast({
+        title: 'Добро пожаловать!',
+        description: 'Вы успешно вошли в систему',
+      });
+      onOpenChange(false);
+      navigate('/cabinet');
+    } else {
+      toast({
+        title: 'Ошибка входа',
+        description: result.error || 'Неверный email или пароль',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
-    <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Вход в систему</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="login-email">Email</Label>
+            <Input id="login-email" name="email" type="email" placeholder="your@email.com" required />
+          </div>
+          <div>
+            <Label htmlFor="login-password">Пароль</Label>
+            <Input id="login-password" name="password" type="password" placeholder="••••••••" required />
+          </div>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? 'Вход...' : 'Войти'}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function RegisterDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+  const { register } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    const formData = new FormData(e.currentTarget);
+    const full_name = formData.get('full_name') as string;
+    const email = formData.get('email') as string;
+    const phone = formData.get('phone') as string;
+    const password = formData.get('password') as string;
+
+    const result = await register(email, password, full_name, phone);
+    
+    setLoading(false);
+    
+    if (result.success) {
+      toast({
+        title: 'Регистрация успешна!',
+        description: 'Добро пожаловать в Сакуру',
+      });
+      onOpenChange(false);
+      navigate('/cabinet');
+    } else {
+      toast({
+        title: 'Ошибка регистрации',
+        description: result.error || 'Не удалось зарегистрироваться',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Регистрация</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="register-name">Полное имя</Label>
+            <Input id="register-name" name="full_name" placeholder="Иван Иванов" required />
+          </div>
+          <div>
+            <Label htmlFor="register-email">Email</Label>
+            <Input id="register-email" name="email" type="email" placeholder="your@email.com" required />
+          </div>
+          <div>
+            <Label htmlFor="register-phone">Телефон</Label>
+            <Input id="register-phone" name="phone" placeholder="+7 (___) ___-__-__" required />
+          </div>
+          <div>
+            <Label htmlFor="register-password">Пароль</Label>
+            <Input id="register-password" name="password" type="password" placeholder="••••••••" required />
+          </div>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? 'Регистрация...' : 'Зарегистрироваться'}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function BookingForm() {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      client_name: formData.get('name') as string,
+      phone: formData.get('phone') as string,
+      service: formData.get('service') as string,
+      master: formData.get('master') as string,
+      booking_date: formData.get('date') as string,
+      booking_time: formData.get('time') as string,
+    };
+
+    const result = await api.createBooking(data);
+    setLoading(false);
+    
+    if (result.success) {
+      toast({
+        title: 'Запись создана!',
+        description: 'Мы ждём вас в назначенное время',
+      });
+      (e.target as HTMLFormElement).reset();
+    } else {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось создать запись',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  return (
+    <form className="space-y-4" onSubmit={handleSubmit}>
       <div>
         <Label htmlFor="name">Имя</Label>
-        <Input id="name" placeholder="Ваше имя" required />
+        <Input id="name" name="name" placeholder="Ваше имя" required />
       </div>
       <div>
         <Label htmlFor="phone">Телефон</Label>
-        <Input id="phone" placeholder="+7 (___) ___-__-__" required />
+        <Input id="phone" name="phone" placeholder="+7 (___) ___-__-__" required />
       </div>
       <div>
         <Label htmlFor="service">Услуга</Label>
-        <Select>
+        <Select name="service" required>
           <SelectTrigger id="service">
             <SelectValue placeholder="Выберите услугу" />
           </SelectTrigger>
@@ -434,7 +664,7 @@ function BookingForm() {
       </div>
       <div>
         <Label htmlFor="master">Мастер</Label>
-        <Select>
+        <Select name="master" required>
           <SelectTrigger id="master">
             <SelectValue placeholder="Выберите мастера" />
           </SelectTrigger>
@@ -448,11 +678,11 @@ function BookingForm() {
       </div>
       <div>
         <Label htmlFor="date">Дата</Label>
-        <Input id="date" type="date" required />
+        <Input id="date" name="date" type="date" required />
       </div>
       <div>
         <Label htmlFor="time">Время</Label>
-        <Select>
+        <Select name="time" required>
           <SelectTrigger id="time">
             <SelectValue placeholder="Выберите время" />
           </SelectTrigger>
@@ -472,9 +702,63 @@ function BookingForm() {
           </SelectContent>
         </Select>
       </div>
-      <Button type="submit" className="w-full gap-2">
+      <Button type="submit" className="w-full gap-2" disabled={loading}>
         <Icon name="Check" size={20} />
-        Подтвердить запись
+        {loading ? 'Отправка...' : 'Подтвердить запись'}
+      </Button>
+    </form>
+  );
+}
+
+function FeedbackForm() {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      name: formData.get('contact-name') as string,
+      phone: formData.get('contact-phone') as string,
+      message: formData.get('contact-message') as string,
+    };
+
+    const result = await api.createFeedback(data);
+    setLoading(false);
+    
+    if (result.success) {
+      toast({
+        title: 'Сообщение отправлено!',
+        description: 'Мы свяжемся с вами в ближайшее время',
+      });
+      (e.target as HTMLFormElement).reset();
+    } else {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось отправить сообщение',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  return (
+    <form className="space-y-4" onSubmit={handleSubmit}>
+      <div>
+        <Label htmlFor="contact-name">Имя</Label>
+        <Input id="contact-name" name="contact-name" placeholder="Ваше имя" required />
+      </div>
+      <div>
+        <Label htmlFor="contact-phone">Телефон</Label>
+        <Input id="contact-phone" name="contact-phone" placeholder="+7 (___) ___-__-__" required />
+      </div>
+      <div>
+        <Label htmlFor="contact-message">Сообщение</Label>
+        <Textarea id="contact-message" name="contact-message" placeholder="Ваше сообщение" rows={4} required />
+      </div>
+      <Button type="submit" className="w-full" disabled={loading}>
+        {loading ? 'Отправка...' : 'Отправить'}
       </Button>
     </form>
   );

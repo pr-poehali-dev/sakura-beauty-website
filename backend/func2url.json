@@ -1,0 +1,6 @@
+{
+  "auth": "https://functions.poehali.dev/4fc9e859-8204-4a89-a644-13ff2262147a",
+  "reviews": "https://functions.poehali.dev/f7d21145-37df-4392-95cc-4cc3b5e4f72d",
+  "bookings": "https://functions.poehali.dev/f02eae3d-b70d-4e88-af2c-6429ae1b0a03",
+  "feedback": "https://functions.poehali.dev/5b65bea3-349f-4793-ace0-eb564074ed31"
+}
