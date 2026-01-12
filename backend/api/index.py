@@ -24,7 +24,7 @@ def handler(event: dict, context) -> dict:
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type, X-User-Id, X-Authorization'
             },
             'body': '',
@@ -108,6 +108,14 @@ def handle_services(conn, method: str, event: dict) -> dict:
               data.get('category'), data.get('is_active', True), data['id']))
         conn.commit()
         return {'status': 'updated'}
+    
+    elif method == 'DELETE':
+        service_id = event.get('queryStringParameters', {}).get('id')
+        if not service_id:
+            return {'error': 'Service ID required'}
+        cursor.execute('DELETE FROM services WHERE id = %s', (service_id,))
+        conn.commit()
+        return {'status': 'deleted'}
     
     return {'error': 'Method not allowed'}
 
@@ -234,6 +242,65 @@ def handle_users(conn, method: str, event: dict) -> dict:
             cursor.execute('SELECT id, email, full_name, phone, role, created_at FROM users')
             users = cursor.fetchall()
             return {'users': users}
+    
+    elif method == 'POST':
+        data = json.loads(event.get('body', '{}'))
+        import hashlib
+        import secrets
+        temp_password = secrets.token_urlsafe(12)
+        password_hash = hashlib.sha256(temp_password.encode()).hexdigest()
+        
+        cursor.execute('''
+            INSERT INTO users (email, password_hash, full_name, phone, role)
+            VALUES (%s, %s, %s, %s, %s)
+            RETURNING id, email, full_name, phone, role, created_at
+        ''', (data['email'], password_hash, data['full_name'], data.get('phone'), data.get('role', 'client')))
+        conn.commit()
+        user = cursor.fetchone()
+        return {'user': user, 'temporary_password': temp_password}
+    
+    elif method == 'PUT':
+        data = json.loads(event.get('body', '{}'))
+        user_id = data.get('id')
+        
+        if not user_id:
+            return {'error': 'User ID required'}
+        
+        fields = []
+        params = []
+        
+        if 'full_name' in data:
+            fields.append('full_name = %s')
+            params.append(data['full_name'])
+        if 'phone' in data:
+            fields.append('phone = %s')
+            params.append(data['phone'])
+        if 'email' in data:
+            fields.append('email = %s')
+            params.append(data['email'])
+        if 'role' in data:
+            fields.append('role = %s')
+            params.append(data['role'])
+        
+        if not fields:
+            return {'error': 'No data to update'}
+        
+        fields.append('updated_at = CURRENT_TIMESTAMP')
+        params.append(user_id)
+        
+        query = f"UPDATE users SET {', '.join(fields)} WHERE id = %s RETURNING id, email, full_name, phone, role"
+        cursor.execute(query, params)
+        conn.commit()
+        user = cursor.fetchone()
+        return {'user': user}
+    
+    elif method == 'DELETE':
+        user_id = event.get('queryStringParameters', {}).get('id')
+        if not user_id:
+            return {'error': 'User ID required'}
+        cursor.execute('DELETE FROM users WHERE id = %s', (user_id,))
+        conn.commit()
+        return {'status': 'deleted'}
     
     elif method == 'PUT':
         data = json.loads(event.get('body', '{}'))

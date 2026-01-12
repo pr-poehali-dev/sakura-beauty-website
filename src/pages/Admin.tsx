@@ -1,29 +1,33 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
-import { api, Booking, Review, Feedback } from '@/lib/api';
+import { api, Service, User } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 
-function Admin() {
-  const { user, loading: authLoading, logout } = useAuth();
+export default function Admin() {
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [feedback, setFeedback] = useState<Feedback[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [serviceDialog, setServiceDialog] = useState(false);
+  const [masterDialog, setMasterDialog] = useState(false);
+  const [editingService, setEditingService] = useState<Service | null>(null);
 
   useEffect(() => {
-    if (!authLoading) {
-      if (!user || user.role !== 'admin') {
-        navigate('/');
-      }
+    if (!authLoading && (!user || user.role !== 'admin')) {
+      navigate('/');
     }
   }, [user, authLoading, navigate]);
 
@@ -35,14 +39,12 @@ function Admin() {
 
   const loadData = async () => {
     try {
-      const [bookingsRes, reviewsRes, feedbackRes] = await Promise.all([
-        api.getBookings(),
-        api.getReviews(),
-        api.getFeedback(),
+      const [servicesRes, usersRes] = await Promise.all([
+        api.getServices(),
+        api.getAllUsers(),
       ]);
-      setBookings(bookingsRes.bookings);
-      setReviews(reviewsRes.reviews);
-      setFeedback(feedbackRes.feedback);
+      setServices(servicesRes.services);
+      setUsers(usersRes.users);
     } catch (error) {
       toast({
         title: 'Ошибка',
@@ -54,77 +56,106 @@ function Admin() {
     }
   };
 
-  const handleUpdateBooking = async (id: number, status: string) => {
+  const handleCreateService = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
     try {
-      await api.updateBooking(id, status);
-      toast({
-        title: 'Запись обновлена',
-        description: `Статус изменён на: ${status}`,
+      await api.createService({
+        name: formData.get('name') as string,
+        description: formData.get('description') as string,
+        duration: Number(formData.get('duration')),
+        price: Number(formData.get('price')),
+        category: formData.get('category') as string,
       });
+      
+      toast({ title: 'Успешно', description: 'Услуга добавлена' });
+      setServiceDialog(false);
       loadData();
     } catch (error) {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось обновить запись',
-        variant: 'destructive',
-      });
+      toast({ title: 'Ошибка', description: 'Не удалось добавить услугу', variant: 'destructive' });
     }
   };
 
-  const handleApproveReview = async (id: number, approved: boolean) => {
+  const handleUpdateService = async (service: Service) => {
     try {
-      await api.approveReview(id, approved);
-      toast({
-        title: approved ? 'Отзыв одобрен' : 'Отзыв отклонён',
-        description: approved ? 'Отзыв теперь виден на сайте' : 'Отзыв скрыт с сайта',
-      });
+      await api.updateService(service);
+      toast({ title: 'Успешно', description: 'Услуга обновлена' });
+      setEditingService(null);
       loadData();
     } catch (error) {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось обновить отзыв',
-        variant: 'destructive',
-      });
+      toast({ title: 'Ошибка', description: 'Не удалось обновить услугу', variant: 'destructive' });
     }
   };
 
-  const handleMarkFeedbackAsRead = async (id: number, is_read: boolean) => {
+  const handleDeleteService = async (id: number) => {
+    if (!confirm('Удалить эту услугу?')) return;
+    
     try {
-      await api.markFeedbackAsRead(id, is_read);
+      await api.deleteService(id);
+      toast({ title: 'Успешно', description: 'Услуга удалена' });
       loadData();
     } catch (error) {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось обновить статус',
-        variant: 'destructive',
-      });
+      toast({ title: 'Ошибка', description: 'Не удалось удалить услугу', variant: 'destructive' });
     }
   };
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
+  const handleCreateMaster = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    try {
+      const result = await api.createMaster({
+        email: formData.get('email') as string,
+        full_name: formData.get('full_name') as string,
+        phone: formData.get('phone') as string,
+      });
+      
+      toast({
+        title: 'Мастер добавлен',
+        description: `Временный пароль: ${result.temporary_password}`,
+      });
+      setMasterDialog(false);
+      loadData();
+    } catch (error) {
+      toast({ title: 'Ошибка', description: 'Не удалось добавить мастера', variant: 'destructive' });
+    }
+  };
+
+  const handleDeleteMaster = async (id: number) => {
+    if (!confirm('Удалить этого мастера?')) return;
+    
+    try {
+      await api.deleteMaster(id);
+      toast({ title: 'Успешно', description: 'Мастер удален' });
+      loadData();
+    } catch (error) {
+      toast({ title: 'Ошибка', description: 'Не удалось удалить мастера', variant: 'destructive' });
+    }
+  };
+
+  const handleUpdateUserRole = async (userId: number, newRole: string) => {
+    try {
+      await api.updateUserRole(userId, newRole);
+      toast({ title: 'Успешно', description: 'Роль изменена' });
+      loadData();
+    } catch (error) {
+      toast({ title: 'Ошибка', description: 'Не удалось изменить роль', variant: 'destructive' });
+    }
   };
 
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Icon name="Loader2" className="animate-spin mx-auto mb-4" size={48} />
-          <p className="text-muted-foreground">Загрузка...</p>
-        </div>
+        <Icon name="Loader2" className="animate-spin" size={48} />
       </div>
     );
   }
 
   if (!user || user.role !== 'admin') return null;
 
-  const stats = {
-    totalBookings: bookings.length,
-    pendingReviews: reviews.filter(r => !r.approved).length,
-    unreadFeedback: feedback.filter(f => !f.is_read).length,
-    confirmedBookings: bookings.filter(b => b.status === 'confirmed').length,
-  };
+  const masters = users.filter(u => u.role === 'master');
+  const clients = users.filter(u => u.role === 'client');
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-secondary/30">
@@ -136,271 +167,207 @@ function Admin() {
                 <Icon name="ArrowLeft" size={24} />
               </Button>
               <div>
-                <h1 className="text-2xl font-bold">Административная панель</h1>
+                <h1 className="text-2xl font-bold">Админ-панель</h1>
                 <p className="text-sm text-muted-foreground">Управление салоном Сакура</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" onClick={() => navigate('/cabinet')}>
-                <Icon name="User" size={18} className="mr-2" />
-                Личный кабинет
-              </Button>
-              <Button variant="ghost" onClick={handleLogout}>
-                <Icon name="LogOut" size={18} className="mr-2" />
-                Выйти
-              </Button>
-            </div>
+            <Button variant="ghost" onClick={() => navigate('/cabinet')}>
+              <Icon name="User" size={18} className="mr-2" />
+              Личный кабинет
+            </Button>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Всего записей</CardTitle>
-              <Icon name="Calendar" className="text-muted-foreground" size={20} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalBookings}</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Активные записи</CardTitle>
-              <Icon name="CheckCircle" className="text-primary" size={20} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.confirmedBookings}</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Новые отзывы</CardTitle>
-              <Icon name="MessageSquare" className="text-accent" size={20} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.pendingReviews}</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Непрочитанные</CardTitle>
-              <Icon name="Mail" className="text-destructive" size={20} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.unreadFeedback}</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Tabs defaultValue="bookings" className="space-y-6">
+        <Tabs defaultValue="services" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="bookings">
-              Записи ({bookings.length})
-            </TabsTrigger>
-            <TabsTrigger value="reviews">
-              Отзывы ({reviews.length})
-            </TabsTrigger>
-            <TabsTrigger value="feedback">
-              Обратная связь ({feedback.length})
-            </TabsTrigger>
+            <TabsTrigger value="services">Услуги ({services.length})</TabsTrigger>
+            <TabsTrigger value="masters">Мастера ({masters.length})</TabsTrigger>
+            <TabsTrigger value="users">Пользователи ({users.length})</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="bookings">
+          <TabsContent value="services">
             <Card>
               <CardHeader>
-                <CardTitle>Управление записями</CardTitle>
+                <div className="flex justify-between items-center">
+                  <CardTitle>Управление услугами</CardTitle>
+                  <Dialog open={serviceDialog} onOpenChange={setServiceDialog}>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Icon name="Plus" size={18} className="mr-2" />
+                        Добавить услугу
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Новая услуга</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={handleCreateService} className="space-y-4">
+                        <div>
+                          <Label>Название</Label>
+                          <Input name="name" required />
+                        </div>
+                        <div>
+                          <Label>Описание</Label>
+                          <Textarea name="description" />
+                        </div>
+                        <div>
+                          <Label>Длительность (мин)</Label>
+                          <Input name="duration" type="number" required />
+                        </div>
+                        <div>
+                          <Label>Цена (руб)</Label>
+                          <Input name="price" type="number" required />
+                        </div>
+                        <div>
+                          <Label>Категория</Label>
+                          <Input name="category" />
+                        </div>
+                        <Button type="submit" className="w-full">Создать</Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {bookings.length === 0 ? (
-                    <div className="text-center py-12">
-                      <Icon name="Calendar" size={48} className="mx-auto mb-4 text-muted-foreground" />
-                      <p className="text-muted-foreground">Записей пока нет</p>
-                    </div>
-                  ) : (
-                    bookings.map((booking) => (
-                      <Card key={booking.id} className="border-2">
-                        <CardContent className="p-6">
-                          <div className="flex justify-between items-start mb-4">
-                            <div>
-                              <h3 className="font-semibold text-lg mb-1">
-                                {booking.client_name}
-                              </h3>
-                              <p className="text-sm text-muted-foreground">
-                                {booking.phone}
-                              </p>
-                            </div>
-                            <Badge variant={
-                              booking.status === 'confirmed' ? 'default' :
-                              booking.status === 'cancelled' ? 'destructive' :
-                              'secondary'
-                            }>
-                              {booking.status === 'confirmed' ? 'Подтверждена' :
-                               booking.status === 'cancelled' ? 'Отменена' :
-                               'Завершена'}
-                            </Badge>
-                          </div>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                            <div>
-                              <p className="text-sm text-muted-foreground">Услуга</p>
-                              <p className="font-medium">{booking.service}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-muted-foreground">Мастер</p>
-                              <p className="font-medium">{booking.master}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-muted-foreground">Дата</p>
-                              <p className="font-medium">
-                                {new Date(booking.booking_date).toLocaleDateString('ru-RU')}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-muted-foreground">Время</p>
-                              <p className="font-medium">{booking.booking_time}</p>
+                  {services.map((service) => (
+                    <Card key={service.id} className="border-2">
+                      <CardContent className="p-6">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-semibold text-lg">{service.name}</h3>
+                            <p className="text-sm text-muted-foreground">{service.description}</p>
+                            <div className="flex gap-4 mt-2 text-sm">
+                              <span>{service.duration} мин</span>
+                              <span className="font-bold">{service.price} ₽</span>
+                              {service.category && <span className="text-primary">{service.category}</span>}
                             </div>
                           </div>
                           <div className="flex gap-2">
-                            {booking.status !== 'completed' && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleUpdateBooking(booking.id, 'completed')}
-                              >
-                                <Icon name="Check" size={16} className="mr-2" />
-                                Завершить
-                              </Button>
-                            )}
-                            {booking.status === 'confirmed' && (
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => handleUpdateBooking(booking.id, 'cancelled')}
-                              >
-                                <Icon name="X" size={16} className="mr-2" />
-                                Отменить
-                              </Button>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="reviews">
-            <Card>
-              <CardHeader>
-                <CardTitle>Модерация отзывов</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {reviews.length === 0 ? (
-                    <div className="text-center py-12">
-                      <Icon name="MessageSquare" size={48} className="mx-auto mb-4 text-muted-foreground" />
-                      <p className="text-muted-foreground">Отзывов пока нет</p>
-                    </div>
-                  ) : (
-                    reviews.map((review) => (
-                      <Card key={review.id} className="border-2">
-                        <CardContent className="p-6">
-                          <div className="flex justify-between items-start mb-4">
-                            <div>
-                              <h3 className="font-semibold text-lg mb-1">{review.author}</h3>
-                              <div className="flex gap-1 mb-2">
-                                {[...Array(review.rating)].map((_, i) => (
-                                  <span key={i}>⭐</span>
-                                ))}
-                              </div>
-                            </div>
-                            <Badge variant={review.approved ? 'default' : 'secondary'}>
-                              {review.approved ? 'Опубликован' : 'На модерации'}
-                            </Badge>
-                          </div>
-                          <p className="text-muted-foreground mb-4">"{review.comment}"</p>
-                          <p className="text-sm text-muted-foreground mb-4">
-                            Дата: {new Date(review.created_at).toLocaleDateString('ru-RU')}
-                          </p>
-                          <div className="flex gap-2">
-                            {!review.approved ? (
-                              <Button
-                                size="sm"
-                                onClick={() => handleApproveReview(review.id, true)}
-                              >
-                                <Icon name="Check" size={16} className="mr-2" />
-                                Одобрить
-                              </Button>
-                            ) : (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleApproveReview(review.id, false)}
-                              >
-                                <Icon name="X" size={16} className="mr-2" />
-                                Скрыть
-                              </Button>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="feedback">
-            <Card>
-              <CardHeader>
-                <CardTitle>Обратная связь</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {feedback.length === 0 ? (
-                    <div className="text-center py-12">
-                      <Icon name="Mail" size={48} className="mx-auto mb-4 text-muted-foreground" />
-                      <p className="text-muted-foreground">Сообщений пока нет</p>
-                    </div>
-                  ) : (
-                    feedback.map((item) => (
-                      <Card key={item.id} className={`border-2 ${!item.is_read ? 'bg-primary/5' : ''}`}>
-                        <CardContent className="p-6">
-                          <div className="flex justify-between items-start mb-4">
-                            <div>
-                              <h3 className="font-semibold text-lg mb-1">{item.name}</h3>
-                              <p className="text-sm text-muted-foreground">{item.phone}</p>
-                            </div>
-                            <Badge variant={item.is_read ? 'secondary' : 'default'}>
-                              {item.is_read ? 'Прочитано' : 'Новое'}
-                            </Badge>
-                          </div>
-                          <p className="text-muted-foreground mb-4">{item.message}</p>
-                          <p className="text-sm text-muted-foreground mb-4">
-                            Дата: {new Date(item.created_at).toLocaleDateString('ru-RU')}
-                          </p>
-                          {!item.is_read && (
                             <Button
-                              size="sm"
                               variant="outline"
-                              onClick={() => handleMarkFeedbackAsRead(item.id, true)}
+                              size="sm"
+                              onClick={() => setEditingService(service)}
                             >
-                              <Icon name="Check" size={16} className="mr-2" />
-                              Отметить как прочитанное
+                              <Icon name="Edit" size={16} />
                             </Button>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))
-                  )}
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteService(service.id)}
+                            >
+                              <Icon name="Trash2" size={16} />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="masters">
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle>Мастера салона</CardTitle>
+                  <Dialog open={masterDialog} onOpenChange={setMasterDialog}>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Icon name="Plus" size={18} className="mr-2" />
+                        Добавить мастера
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Новый мастер</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={handleCreateMaster} className="space-y-4">
+                        <div>
+                          <Label>Имя</Label>
+                          <Input name="full_name" required />
+                        </div>
+                        <div>
+                          <Label>Email</Label>
+                          <Input name="email" type="email" required />
+                        </div>
+                        <div>
+                          <Label>Телефон</Label>
+                          <Input name="phone" />
+                        </div>
+                        <Button type="submit" className="w-full">Создать</Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {masters.map((master) => (
+                    <Card key={master.id} className="border-2">
+                      <CardContent className="p-6">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-semibold text-lg">{master.full_name}</h3>
+                            <p className="text-sm text-muted-foreground">{master.email}</p>
+                            {master.phone && <p className="text-sm">{master.phone}</p>}
+                          </div>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteMaster(master.id)}
+                          >
+                            <Icon name="Trash2" size={16} />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="users">
+            <Card>
+              <CardHeader>
+                <CardTitle>Управление пользователями</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {users.map((u) => (
+                    <Card key={u.id} className="border-2">
+                      <CardContent className="p-6">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-semibold text-lg">{u.full_name}</h3>
+                            <p className="text-sm text-muted-foreground">{u.email}</p>
+                            {u.phone && <p className="text-sm">{u.phone}</p>}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Label className="text-sm">Роль:</Label>
+                            <Select
+                              value={u.role}
+                              onValueChange={(role) => handleUpdateUserRole(u.id, role)}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="client">Клиент</SelectItem>
+                                <SelectItem value="master">Мастер</SelectItem>
+                                <SelectItem value="admin">Админ</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -410,5 +377,3 @@ function Admin() {
     </div>
   );
 }
-
-export default Admin;

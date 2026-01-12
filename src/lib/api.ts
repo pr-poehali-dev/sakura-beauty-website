@@ -5,14 +5,27 @@ const ENDPOINTS = {
   bookings: 'f02eae3d-b70d-4e88-af2c-6429ae1b0a03',
   reviews: 'f7d21145-37df-4392-95cc-4cc3b5e4f72d',
   feedback: '5b65bea3-349f-4793-ace0-eb564074ed31',
+  api: '6816f86a-23a7-4c1b-bf49-ddb0cac0dd85',
 };
+
+export interface Service {
+  id: number;
+  name: string;
+  description?: string;
+  duration: number;
+  price: number;
+  category?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at?: string;
+}
 
 export interface User {
   id: number;
   email: string;
   full_name: string;
   phone?: string;
-  role: 'client' | 'admin';
+  role: 'client' | 'admin' | 'master';
 }
 
 export interface AuthResponse {
@@ -71,7 +84,7 @@ class ApiClient {
 
     const sessionToken = this.getSessionToken();
     if (sessionToken) {
-      headers['X-Session-Token'] = sessionToken;
+      headers['Authorization'] = `Bearer ${sessionToken}`;
     }
 
     const options: RequestInit = {
@@ -185,6 +198,48 @@ class ApiClient {
 
   async markFeedbackAsRead(id: number, is_read: boolean): Promise<{ success: boolean }> {
     return this.request(ENDPOINTS.feedback, 'PUT', { id, is_read }, true);
+  }
+
+  async getServices(): Promise<{ services: Service[] }> {
+    return this.request<{ services: Service[] }>(`${ENDPOINTS.api}?path=services&action=list`, 'GET');
+  }
+
+  async createService(data: {
+    name: string;
+    description?: string;
+    duration: number;
+    price: number;
+    category?: string;
+  }): Promise<{ id: number; status: string }> {
+    return this.request(`${ENDPOINTS.api}?path=services`, 'POST', data, true);
+  }
+
+  async updateService(data: Service): Promise<{ status: string }> {
+    return this.request(`${ENDPOINTS.api}?path=services`, 'PUT', data, true);
+  }
+
+  async deleteService(id: number): Promise<{ status: string }> {
+    return this.request(`${ENDPOINTS.api}?path=services&id=${id}`, 'DELETE', undefined, true);
+  }
+
+  async getAllUsers(): Promise<{ users: User[] }> {
+    return this.request<{ users: User[] }>(`${ENDPOINTS.api}?path=users`, 'GET', undefined, true);
+  }
+
+  async updateUserRole(id: number, role: string): Promise<{ user: User }> {
+    return this.request<{ user: User }>(`${ENDPOINTS.api}?path=users`, 'PUT', { id, role }, true);
+  }
+
+  async createMaster(data: {
+    email: string;
+    full_name: string;
+    phone?: string;
+  }): Promise<{ user: User; temporary_password: string }> {
+    return this.request(`${ENDPOINTS.api}?path=users`, 'POST', { ...data, role: 'master' }, true);
+  }
+
+  async deleteMaster(id: number): Promise<{ status: string }> {
+    return this.request(`${ENDPOINTS.api}?path=users&id=${id}`, 'DELETE', undefined, true);
   }
 }
 
