@@ -60,9 +60,9 @@ export default function Services() {
 
         <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {services.map((service, index) => (
-            <Card key={index} className="hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/30">
+            <Card key={index} className="hover:shadow-xl transition-all duration-300 border-2 hover:border-pink-300">
               <CardHeader>
-                <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-pink-400 to-purple-500 rounded-2xl flex items-center justify-center mb-4">
                   <Icon name={service.icon as any} size={32} className="text-white" />
                 </div>
                 <CardTitle className="text-2xl">{service.title}</CardTitle>
@@ -80,11 +80,11 @@ export default function Services() {
             Не нашли нужную услугу? Свяжитесь с нами для консультации!
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <a href="/booking" className="inline-flex items-center px-8 py-4 bg-primary text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105">
+            <a href="/booking" className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105">
               <Icon name="Calendar" size={20} className="mr-2" />
               Записаться онлайн
             </a>
-            <a href="/contacts" className="inline-flex items-center px-8 py-4 bg-white text-gray-900 font-semibold rounded-xl border-2 border-gray-200 hover:border-primary transition-all duration-300 hover:shadow-lg">
+            <a href="/contacts" className="inline-flex items-center px-8 py-4 bg-white text-gray-900 font-semibold rounded-xl border-2 border-gray-200 hover:border-pink-400 transition-all duration-300 hover:shadow-lg">
               <Icon name="Phone" size={20} className="mr-2" />
               Связаться с нами
             </a>

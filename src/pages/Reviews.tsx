@@ -114,7 +114,7 @@ export default function Reviews() {
         </div>
 
         {user && (
-          <Card className="max-w-3xl mx-auto mb-12 border-2 border-primary/30">
+          <Card className="max-w-3xl mx-auto mb-12 border-2 border-pink-200">
             <CardHeader>
               <h2 className="text-2xl font-bold text-gray-900">Оставьте свой отзыв</h2>
             </CardHeader>
@@ -153,7 +153,7 @@ export default function Reviews() {
               <Button 
                 onClick={handleSubmitReview}
                 disabled={isSubmitting}
-                className="w-full bg-primary"
+                className="w-full bg-gradient-to-r from-pink-500 to-purple-600"
               >
                 {isSubmitting ? 'Отправка...' : 'Отправить отзыв'}
               </Button>
@@ -166,7 +166,7 @@ export default function Reviews() {
             <Card key={index} className="hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-start space-x-4">
-                  <Avatar className="h-12 w-12 bg-primary">
+                  <Avatar className="h-12 w-12 bg-gradient-to-br from-pink-400 to-purple-500">
                     <AvatarFallback className="text-white font-semibold">
                       {review.author[0]}
                     </AvatarFallback>
@@ -194,7 +194,7 @@ export default function Reviews() {
             <p className="text-lg text-gray-600 mb-6">
               Хотите оставить отзыв? Войдите в систему или зарегистрируйтесь
             </p>
-            <Button className="bg-primary">
+            <Button className="bg-gradient-to-r from-pink-500 to-purple-600">
               Войти
             </Button>
           </div>

@@ -78,13 +78,13 @@ export default function Contacts() {
 
         <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
           <div className="space-y-6">
-            <Card className="border-2 border-primary/30">
+            <Card className="border-2 border-pink-200">
               <CardHeader>
                 <CardTitle className="text-2xl">Наши контакты</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-purple-500 rounded-xl flex items-center justify-center flex-shrink-0">
                     <Icon name="MapPin" size={24} className="text-white" />
                   </div>
                   <div>
@@ -95,7 +95,7 @@ export default function Contacts() {
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-purple-500 rounded-xl flex items-center justify-center flex-shrink-0">
                     <Icon name="Phone" size={24} className="text-white" />
                   </div>
                   <div>
@@ -106,7 +106,7 @@ export default function Contacts() {
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-purple-500 rounded-xl flex items-center justify-center flex-shrink-0">
                     <Icon name="Mail" size={24} className="text-white" />
                   </div>
                   <div>
@@ -117,7 +117,7 @@ export default function Contacts() {
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-purple-500 rounded-xl flex items-center justify-center flex-shrink-0">
                     <Icon name="Clock" size={24} className="text-white" />
                   </div>
                   <div>
@@ -154,7 +154,7 @@ export default function Contacts() {
             </Card>
           </div>
 
-          <Card className="border-2 border-primary/30">
+          <Card className="border-2 border-pink-200">
             <CardHeader>
               <CardTitle className="text-2xl">Напишите нам</CardTitle>
             </CardHeader>
@@ -208,7 +208,7 @@ export default function Contacts() {
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-primary text-lg py-6"
+                  className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-lg py-6"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (

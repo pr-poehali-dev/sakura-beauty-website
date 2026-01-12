@@ -1,4 +1,5 @@
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
@@ -58,7 +59,7 @@ export default function Index() {
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              Салон красоты <span className="bg-primary bg-clip-text text-transparent">Сакура</span>
+              Салон красоты <span className="bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">Сакура</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8">
               Ваша красота — наша страсть. Профессиональные услуги красоты в уютной атмосфере
@@ -66,7 +67,7 @@ export default function Index() {
             <div className="flex flex-wrap gap-4 justify-center">
               <Button 
                 size="lg"
-                className="bg-primary text-lg px-8 py-6"
+                className="bg-gradient-to-r from-pink-500 to-purple-600 text-lg px-8 py-6"
                 onClick={() => window.location.href = '/booking'}
               >
                 <Icon name="Calendar" size={20} className="mr-2" />
@@ -92,9 +93,9 @@ export default function Index() {
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
             {features.map((feature, index) => (
-              <Card key={index} className="text-center hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/30">
+              <Card key={index} className="text-center hover:shadow-xl transition-all duration-300 border-2 hover:border-pink-300">
                 <CardContent className="pt-8">
-                  <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-pink-400 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Icon name={feature.icon as any} size={32} className="text-white" />
                   </div>
                   <h3 className="text-xl font-semibold mb-3 text-gray-900">{feature.title}</h3>
@@ -118,9 +119,9 @@ export default function Index() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto mb-12">
             {services.map((service, index) => (
-              <Card key={index} className="hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 hover:border-primary/30">
+              <Card key={index} className="hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 hover:border-pink-300">
                 <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-pink-400 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Icon name={service.icon as any} size={32} className="text-white" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2 text-gray-900">{service.title}</h3>
@@ -144,7 +145,7 @@ export default function Index() {
 
       <section className="py-20 px-4">
         <div className="container mx-auto max-w-4xl text-center">
-          <Card className="bg-primary text-white border-0 overflow-hidden">
+          <Card className="bg-gradient-to-br from-pink-500 to-purple-600 text-white border-0 overflow-hidden">
             <CardContent className="p-12">
               <Icon name="Sparkles" size={48} className="mx-auto mb-6" />
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -156,7 +157,7 @@ export default function Index() {
               <Button 
                 size="lg"
                 variant="secondary"
-                className="bg-white hover:bg-gray-100 text-lg px-8 py-6"
+                className="bg-white text-purple-600 hover:bg-gray-100 text-lg px-8 py-6"
                 onClick={() => window.location.href = '/booking'}
               >
                 <Icon name="Calendar" size={20} className="mr-2" />
@@ -167,11 +168,7 @@ export default function Index() {
         </div>
       </section>
 
-      <footer className="bg-gray-900 text-white py-8">
-        <div className="container mx-auto px-4 text-center text-gray-400">
-          <p>&copy; 2024 Салон красоты Сакура. Все права защищены.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

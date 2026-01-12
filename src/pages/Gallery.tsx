@@ -70,7 +70,7 @@ export default function Gallery() {
                 {category.items.map((item, index) => (
                   <Card 
                     key={index} 
-                    className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer border-2 hover:border-primary/30"
+                    className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer border-2 hover:border-pink-300"
                   >
                     <div className={`h-64 bg-gradient-to-br ${item.color} flex items-end p-6`}>
                       <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg">
@@ -90,7 +90,7 @@ export default function Gallery() {
           </p>
           <a 
             href="/booking" 
-            className="inline-flex items-center px-8 py-4 bg-primary text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105"
+            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105"
           >
             Записаться на услугу
           </a>

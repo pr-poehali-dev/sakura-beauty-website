@@ -86,10 +86,10 @@ export default function Price() {
 
         <div className="grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
           {priceList.map((category, index) => (
-            <Card key={index} className="hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/30">
+            <Card key={index} className="hover:shadow-xl transition-all duration-300 border-2 hover:border-pink-300">
               <CardHeader>
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-purple-500 rounded-xl flex items-center justify-center">
                     <Icon name={category.icon as any} size={24} className="text-white" />
                   </div>
                   <CardTitle className="text-2xl">{category.category}</CardTitle>
@@ -106,7 +106,7 @@ export default function Price() {
                           {item.duration}
                         </p>
                       </div>
-                      <p className="font-semibold text-primary ml-4 whitespace-nowrap">{item.price}</p>
+                      <p className="font-semibold text-pink-600 ml-4 whitespace-nowrap">{item.price}</p>
                     </div>
                   ))}
                 </div>
@@ -116,10 +116,10 @@ export default function Price() {
         </div>
 
         <div className="mt-16 max-w-3xl mx-auto">
-          <Card className="bg-primary/10 border-2 border-primary/30">
+          <Card className="bg-gradient-to-br from-pink-100 to-purple-100 border-2 border-pink-300">
             <CardContent className="p-8">
               <div className="flex items-start space-x-4">
-                <Icon name="Info" size={24} className="text-primary mt-1 flex-shrink-0" />
+                <Icon name="Info" size={24} className="text-pink-600 mt-1 flex-shrink-0" />
                 <div className="space-y-2">
                   <h3 className="font-semibold text-lg text-gray-900">Важная информация</h3>
                   <ul className="space-y-2 text-gray-700">
@@ -140,7 +140,7 @@ export default function Price() {
           </p>
           <a 
             href="/booking" 
-            className="inline-flex items-center px-8 py-4 bg-primary text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105"
+            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105"
           >
             <Icon name="Calendar" size={20} className="mr-2" />
             Записаться онлайн
