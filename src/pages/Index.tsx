@@ -1,5 +1,4 @@
 import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
@@ -145,7 +144,7 @@ export default function Index() {
 
       <section className="py-20 px-4">
         <div className="container mx-auto max-w-4xl text-center">
-          <Card className="bg-gradient-to-br from-pink-500 to-purple-600 text-white border-0 overflow-hidden">
+          <Card className="bg-primary text-white border-0 overflow-hidden">
             <CardContent className="p-12">
               <Icon name="Sparkles" size={48} className="mx-auto mb-6" />
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -157,7 +156,7 @@ export default function Index() {
               <Button 
                 size="lg"
                 variant="secondary"
-                className="bg-white text-purple-600 hover:bg-gray-100 text-lg px-8 py-6"
+                className="bg-white hover:bg-gray-100 text-lg px-8 py-6"
                 onClick={() => window.location.href = '/booking'}
               >
                 <Icon name="Calendar" size={20} className="mr-2" />
@@ -168,7 +167,14 @@ export default function Index() {
         </div>
       </section>
 
-      <Footer />
+      <footer className="bg-gray-900 text-white py-8">
+        <div className="container mx-auto px-4 text-center text-gray-400">
+          <p>&copy; 2024 Салон красоты Сакура. Все права защищены.</p>
+        </div>
+      </footer>
+    </div>
+  );
+}
     </div>
   );
 }

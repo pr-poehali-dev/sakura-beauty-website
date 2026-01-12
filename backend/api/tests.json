@@ -1,0 +1,24 @@
+{
+  "tests": [
+    {
+      "name": "Get all services",
+      "method": "GET",
+      "path": "/?path=services&action=list",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "services": "array"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Get all users with employee role",
+      "method": "GET",
+      "path": "/?path=users&role=employee",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "users": "array"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
