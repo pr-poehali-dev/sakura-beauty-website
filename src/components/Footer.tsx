@@ -10,7 +10,7 @@ export default function Footer() {
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div>
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-purple-500 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
                 <Icon name="Sparkles" size={24} className="text-white" />
               </div>
               <span className="text-xl font-bold">Сакура</span>
@@ -24,22 +24,22 @@ export default function Footer() {
             <h3 className="font-semibold mb-4">Навигация</h3>
             <ul className="space-y-2">
               <li>
-                <button onClick={() => navigate('/')} className="text-gray-400 hover:text-pink-400 transition-colors">
+                <button onClick={() => navigate('/')} className="text-gray-400 hover:text-primary transition-colors">
                   Главная
                 </button>
               </li>
               <li>
-                <button onClick={() => navigate('/services')} className="text-gray-400 hover:text-pink-400 transition-colors">
+                <button onClick={() => navigate('/services')} className="text-gray-400 hover:text-primary transition-colors">
                   Услуги
                 </button>
               </li>
               <li>
-                <button onClick={() => navigate('/masters')} className="text-gray-400 hover:text-pink-400 transition-colors">
+                <button onClick={() => navigate('/masters')} className="text-gray-400 hover:text-primary transition-colors">
                   Мастера
                 </button>
               </li>
               <li>
-                <button onClick={() => navigate('/price')} className="text-gray-400 hover:text-pink-400 transition-colors">
+                <button onClick={() => navigate('/price')} className="text-gray-400 hover:text-primary transition-colors">
                   Прайс-лист
                 </button>
               </li>

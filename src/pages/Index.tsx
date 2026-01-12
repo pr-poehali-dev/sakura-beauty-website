@@ -58,7 +58,7 @@ export default function Index() {
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              Салон красоты <span className="bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">Сакура</span>
+              Салон красоты <span className="bg-primary bg-clip-text text-transparent">Сакура</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8">
               Ваша красота — наша страсть. Профессиональные услуги красоты в уютной атмосфере
@@ -66,7 +66,7 @@ export default function Index() {
             <div className="flex flex-wrap gap-4 justify-center">
               <Button 
                 size="lg"
-                className="bg-gradient-to-r from-pink-500 to-purple-600 text-lg px-8 py-6"
+                className="bg-primary text-lg px-8 py-6"
                 onClick={() => window.location.href = '/booking'}
               >
                 <Icon name="Calendar" size={20} className="mr-2" />
@@ -92,9 +92,9 @@ export default function Index() {
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
             {features.map((feature, index) => (
-              <Card key={index} className="text-center hover:shadow-xl transition-all duration-300 border-2 hover:border-pink-300">
+              <Card key={index} className="text-center hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/30">
                 <CardContent className="pt-8">
-                  <div className="w-16 h-16 bg-gradient-to-br from-pink-400 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Icon name={feature.icon as any} size={32} className="text-white" />
                   </div>
                   <h3 className="text-xl font-semibold mb-3 text-gray-900">{feature.title}</h3>
@@ -118,9 +118,9 @@ export default function Index() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto mb-12">
             {services.map((service, index) => (
-              <Card key={index} className="hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 hover:border-pink-300">
+              <Card key={index} className="hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 hover:border-primary/30">
                 <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-pink-400 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Icon name={service.icon as any} size={32} className="text-white" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2 text-gray-900">{service.title}</h3>

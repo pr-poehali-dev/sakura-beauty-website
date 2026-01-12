@@ -67,17 +67,17 @@ export default function Masters() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {masters.map((master, index) => (
-            <Card key={index} className="hover:shadow-xl transition-all duration-300 border-2 hover:border-pink-300">
+            <Card key={index} className="hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/30">
               <CardHeader>
                 <div className="flex items-center space-x-4 mb-4">
-                  <Avatar className="h-16 w-16 bg-gradient-to-br from-pink-400 to-purple-500">
+                  <Avatar className="h-16 w-16 bg-primary">
                     <AvatarFallback className="text-white text-xl font-semibold">
                       {master.name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <CardTitle className="text-xl">{master.name}</CardTitle>
-                    <CardDescription className="text-sm font-medium text-pink-600">
+                    <CardDescription className="text-sm font-medium text-primary">
                       {master.specialty}
                     </CardDescription>
                   </div>
@@ -93,7 +93,7 @@ export default function Masters() {
                   {master.skills.map((skill, idx) => (
                     <span 
                       key={idx}
-                      className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm font-medium"
+                      className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium"
                     >
                       {skill}
                     </span>
@@ -110,7 +110,7 @@ export default function Masters() {
           </p>
           <a 
             href="/booking" 
-            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105"
+            className="inline-flex items-center px-8 py-4 bg-primary text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105"
           >
             <Icon name="Calendar" size={20} className="mr-2" />
             Записаться на услугу
