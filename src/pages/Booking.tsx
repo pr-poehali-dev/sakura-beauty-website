@@ -229,22 +229,6 @@ export default function Booking() {
               )}
             </CardContent>
           </Card>
-
-          <Card className="mt-8 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200">
-            <CardContent className="p-6">
-              <div className="flex items-start space-x-4">
-                <Icon name="Phone" size={24} className="text-purple-600 mt-1 flex-shrink-0" />
-                <div>
-                  <h3 className="font-semibold text-lg mb-2">Можно позвонить</h3>
-                  <p className="text-gray-700 mb-2">
-                    Предпочитаете записаться по телефону? Звоните нам:
-                  </p>
-                  <p className="text-2xl font-bold text-purple-600">+7 (999) 123-45-67</p>
-                  <p className="text-sm text-gray-600 mt-2">Ежедневно с 9:00 до 21:00</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </main>
 
